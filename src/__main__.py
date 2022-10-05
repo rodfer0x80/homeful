@@ -17,7 +17,11 @@ PLACES_FAILED_LOCAL = "data/places_failed.txt"
 
 def setupCreds():
     global USERNAME, PASSWORD
-    USERNAME = "rodrigolf080@gmail.com"
+    try:
+        with open(".env" as 'r') as h:
+            USERNAME = h.read().splitlines()[0]
+    except:
+        return 0
     PASSWORD = os.environ.get('SR_PASSWD')
     if not PASSWORD or not USERNAME:
         return 0
