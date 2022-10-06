@@ -6,13 +6,13 @@ build: # Build python venv with deps
 clean: # Cleanup venv build
 	scripts/cleanup.sh
 
-.PHONY: run
-run: # Run main script
-	scripts/run.py
+.PHONY: search
+search: # Run main script
+	echo "search" | scripts/run.py
 
-.PHONY: debug
-debug: # Run main debug script
-	scripts/debug.py
+.PHONY: spam
+spam: # Run main script
+	echo "spam" | scripts/run.py
 
 .PHONY: test
 test: # Run main script

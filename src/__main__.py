@@ -11,18 +11,19 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 USERNAME = ""
 PASSWORD = ""
 MESSAGE = ""
-MESSAGE_LOCAL = "data/message.txt"
-PLACES_LOCAL = "data/places.txt"
-PLACES_FAILED_LOCAL = "data/places_failed.txt"
+DATA_LOCAL = "./data"
+MESSAGE_LOCAL = f"{DATA_LOCAL}/message.txt"
+PLACES_LOCAL = f"{DATA_LOCAL}/places.txt"
+PLACES_SPAMMED_LOCAL = f"{DATA_LOCAL}/places_spammed.txt"
+PLACES_FAILED_LOCAL = f"{DATA_LOCAL}/places_failed.txt"
+
+SEARCH_MODE = False
+RET = 0
 
 def setupCreds():
     global USERNAME, PASSWORD
-    try:
-        with open(".env" as 'r') as h:
-            USERNAME = h.read().splitlines()[0]
-    except:
-        return 0
-    PASSWORD = os.environ.get('SR_PASSWD')
+    USERNAME = os.environ.get('HM_MAIL')
+    PASSWORD = os.environ.get('HM_PASS')
     if not PASSWORD or not USERNAME:
         return 0
     return 1
@@ -37,12 +38,14 @@ def setupMessage():
     return 1
 
 def setupDriver():
-    #options = FirefoxOptions()
-    #options.add_argument("--headless")
-    #driver = webdriver.Firefox(options=options)
-   
     try:
+        ## Headless
+        # options = FirefoxOptions()
+        # options.add_argument("--headless")
+        # driver = webdriver.Firefox(options=options)
+        
         driver = webdriver.Firefox()
+
     except:
         return None
 
@@ -97,49 +100,106 @@ def doSpam(driver):
         time.sleep(1)
 
     try:
-        os.remove(PLACES_LOCAL)
+        os.system(f"cat {PLACES_LOCAL} >> {PLACES_SPAMMED_LOCAL}")
     except:
         return 0
 
     return 1
 
+def doSearch(driver):
+    global PLACES_LOCAL, CITIES_LOCAL
+    
+    places = list()
+    try:
+        with open(CITIES_LOCAL, 'r') as hc:
+            cities = hc.read().splitlines()
+        if '' in cities:
+            cities.pop()
+    except:
+        return -6
 
-def main():
+    done = False
+    
+    for city in cities:
+        # find places
+        time.sleep(1)
+        # append them to places
+        try:
+            with open(PLACES_LOCAL, 'a') as h:
+                h.write(f"{place}\n")
+        except:
+            return -7
+    
+    try:
+        os.system(f"cat {PLACES_LOCAL} >> {PLACES_SPAMMED_LOCAL}")
+    except:
+        return -8
+
+    return 1
+
+def runme():
+    global SEARCH_MODE
+
     if not setupCreds():
         return -1
     
     if not setupMessage():
         return -2 
-
+    
     driver = setupDriver()
     if not driver:
         return -3
     
-    try:
-        login(driver)
-   
-        doSpam(driver)
-    except KeyboardInterrupt:
-        cleanupDriver(driver)
+    #login(driver)
+        
+    if SEARCH_MODE:
+        doSearch(driver)
+    if not doSpam(driver):
         return -4
+
+    cleanupDriver(driver)
+    
+    return -5
 
     cleanupDriver(driver)
     return 0
 
 
+def main():
+    global RET, SEARCH_MODE
+    if len(sys.argv) > 1:
+        run = sys.argv[1]
+    
+    if run == "search":
+        SEARCH_MODE = True
+    elif run == "spam":
+        SEARCH_MODE = False
+    else:
+        RET = 1
+    
+    if not RET:
+        try:
+            runme()
+        except KeyboardInterrupt:
+            return RET
+    if RET:
+        _msg = ""
+        if RET == 1:
+            _msg = f"Usage {sys.argv[0]} <mode spam/search>"
+        elif RET == -1:
+            _msg = "Error setting up credentials"
+        elif RET == -2:
+            _msg = "Error setting up copywriting message"
+        elif RET == -3:
+            _msg = "Error setting up webdriver"
+        elif RET == -4:
+            _msg = "Error s"
+        elif RET == -5:
+            _msg = "Error during webdriver execution"
+        sys.stderr.write(f"[!] Return Code: {str(RET)}\n")
+        if _msg:
+            sys.stderr.write(f"[!] Error Message: {_msg}\n")
+    return RET
+
 if __name__ == '__main__':
-    ret = main()
-    if ret:
-        ret_msg = ""
-        if ret == -1:
-            ret_msg = "Error setting up credentials"
-        elif ret == -2:
-            ret_msg = "Error setting up copywriting message"
-        elif ret == -3:
-            ret_msg = "Error setting up webdriver"
-        elif ret == -4:
-            ret_msg = "Error during webdriver execution"
-        sys.stderr.write(f"[!] Return Code: {str(ret)}\n")
-        if ret_msg:
-            sys.stderr.write(f"[!] Error Message: {ret_msg}\n")
     sys.exit(main())
