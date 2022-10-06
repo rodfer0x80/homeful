@@ -1,0 +1,16 @@
+while not done searching 
+
+search city:
+    if not len cities:
+        return
+    get https://www.spareroom.co.uk/content/myaccount/myaccount-index/
+    insert {city} into id search_by_location_field
+    click button class button--secondary type submit
+
+    try
+        while find articles copy a>href to places
+        click a id paginationNextPageLink
+    except
+        pop cities
+        search city of next city
+    return

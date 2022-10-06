@@ -3,7 +3,7 @@
 import os
 import sys
 
-MAIN_MODULE = "src/__main__.py"
+MAIN_MODULE = "src/homeful.py"
 
 def main():
     if len(sys.argv) != 2:

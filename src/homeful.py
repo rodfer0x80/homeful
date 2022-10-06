@@ -14,6 +14,7 @@ MESSAGE = ""
 DATA_LOCAL = "./data"
 MESSAGE_LOCAL = f"{DATA_LOCAL}/message.txt"
 PLACES_LOCAL = f"{DATA_LOCAL}/places.txt"
+PLACES_SEARCH_LOCAL = f"{DATA_LOCAL}/places_search.txt"
 PLACES_SPAMMED_LOCAL = f"{DATA_LOCAL}/places_spammed.txt"
 PLACES_FAILED_LOCAL = f"{DATA_LOCAL}/places_failed.txt"
 
@@ -68,7 +69,7 @@ def login(driver):
     time.sleep(1)
     return 0
 
-def doSpam(driver):
+def spam(driver):
     global MESSAGE, PLACES_LOCAL, PLACES_FAILED_LOCAL
     places = list()
     with open(PLACES_LOCAL, 'r') as h:
@@ -100,40 +101,68 @@ def doSpam(driver):
         time.sleep(1)
 
     try:
-        os.system(f"cat {PLACES_LOCAL} >> {PLACES_SPAMMED_LOCAL}")
+        with open(PLACES_LOCAL, 'r') as hp:
+            with open(PLACES_SPAMMED_LOCAL, 'a') as hpp:
+                hpp.write(hp.read())
+        os.remove(PLACES_LOCAL)
     except:
         return 0
 
     return 1
 
-def doSearch(driver):
-    global PLACES_LOCAL, CITIES_LOCAL
+def search(driver):
+    global PLACES_LOCAL, PLACES_SEARCH_LOCAL
+    search_uri = "https://www.spareroom.co.uk/flatshare/search.pl"
     
     places = list()
     try:
-        with open(CITIES_LOCAL, 'r') as hc:
+        with open(PLACES_SEARCH_LOCAL, 'r') as hc:
             cities = hc.read().splitlines()
         if '' in cities:
             cities.pop()
-    except:
+    except FileNotFoundError:
         return -6
 
     done = False
     
     for city in cities:
-        # find places
+        done = False
+        driver.get(search_uri)
         time.sleep(1)
-        # append them to places
-        try:
-            with open(PLACES_LOCAL, 'a') as h:
-                h.write(f"{place}\n")
-        except:
-            return -7
-    
-    try:
-        os.system(f"cat {PLACES_LOCAL} >> {PLACES_SPAMMED_LOCAL}")
-    except:
-        return -8
+        driver.find_element('id', "search_by_location_field").send_keys(city)
+        time.sleep(1)
+        # click button class button--secondary type submit
+        #driver.find_element('xpath', "//button[@class='button button--secondary']")
+        driver.find_element('id', "search-button").click()
+        time.sleep(1)
+
+        while not done:
+            places = list()
+            pageDone = False
+            i = 10
+            try:
+                elems = driver.find_elements('xpath', "//a[@href]")
+                links = [elem.get_attribute('href') for elem in elems]
+                for link in links:
+                    if "flatshare_detail.pl" in link:
+                        places.append(link)
+                
+                try:
+                    with open(PLACES_LOCAL, 'a') as h:
+                        for place in places:
+                            h.write(f"{place}\n")
+                except FileNotFoundError:
+                    return -7
+                try:
+                    # click a id paginationNextPageLink
+                    # ?offset={i}
+                    driver.find_element('id', "paginationNextPageLink").click()
+                    time.sleep(1)
+                    # i += 10
+                except:
+                    done = True
+            except KeyboardInterrupt:
+                return 1
 
     return 1
 
@@ -150,11 +179,11 @@ def runme():
     if not driver:
         return -3
     
-    #login(driver)
+    login(driver)
         
     if SEARCH_MODE:
-        doSearch(driver)
-    if not doSpam(driver):
+        search(driver)
+    if not spam(driver):
         return -4
 
     cleanupDriver(driver)
