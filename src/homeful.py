@@ -131,15 +131,14 @@ def search(driver):
         time.sleep(1)
         driver.find_element('id', "search_by_location_field").send_keys(city)
         time.sleep(1)
-        # click button class button--secondary type submit
-        #driver.find_element('xpath', "//button[@class='button button--secondary']")
+        driver.find_element('xpath', "//div[@class='autocomplete-suggestion']").click()
+        time.sleep(1)
         driver.find_element('id', "search-button").click()
         time.sleep(1)
-
+        
         while not done:
             places = list()
-            pageDone = False
-            i = 10
+            #i = 10
             try:
                 elems = driver.find_elements('xpath', "//a[@href]")
                 links = [elem.get_attribute('href') for elem in elems]
@@ -151,16 +150,19 @@ def search(driver):
                     with open(PLACES_LOCAL, 'a') as h:
                         for place in places:
                             h.write(f"{place}\n")
+                        places = list()
                 except FileNotFoundError:
                     return -7
                 try:
                     # click a id paginationNextPageLink
                     # ?offset={i}
+                    # driver.find_element('xpath', "//div[@class='autocomplete-suggestion']").click()
                     driver.find_element('id', "paginationNextPageLink").click()
                     time.sleep(1)
                     # i += 10
                 except:
                     done = True
+                    continue
             except KeyboardInterrupt:
                 return 1
 
