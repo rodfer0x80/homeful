@@ -1,5 +1,5 @@
 # homeful
-## Find yourself a home
+-- Find yourself a home
 ````
 ./.env -- USERNAME and PASSWORD env vars
 ./data -- directory for data
