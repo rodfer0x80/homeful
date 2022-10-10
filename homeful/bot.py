@@ -59,7 +59,7 @@ class Bot:
 
     def cleanupDriver(self):
         try:
-            self.DRIVE.close()
+            self.DRIVER.close()
         except:
             _msg = "[x] (4) Error closing browser driver\n"
             self.logger.log(_msg)
@@ -71,60 +71,66 @@ class Bot:
             uri = "https://www.spareroom.co.uk/flatshare/mythreads_beta.pl"
             self.DRIVER.get(uri)
             time.sleep(1)
-            #time.sleep(1)
+            time.sleep(1)
             self.DRIVER.find_element('id', "onetrust-accept-btn-handler").click()
             time.sleep(1)
-            self.DRIVER.find_element('id', "loginemail").send_keys(USERNAME)
-            self.DRIVER.find_element('id', "loginpass").send_keys(PASSWORD)
+            self.DRIVER.find_element('id', "loginemail").send_keys(self.USERNAME)
+            self.DRIVER.find_element('id', "loginpass").send_keys(self.PASSWORD)
             self.DRIVER.find_element('id', "sign-in-button").click()
-            #time.sleep(1)
+            time.sleep(1)
         except:
             _msg = "[x] (5) Error logging in with browser driver\n"
             self.logger.log(_msg)
             sys.stderr.write(_msg)
         return 0
 
-        def spam(self):
-            places = list()
+    def spam(self):
+        places = list()
+        try:
             with open(self.PLACES_LOCAL, 'r') as h:
                 places = h.read().splitlines()
-            if '' in places:
-                places.pop()
-            i = 0
-            neg_i = 0
-            for place in places:
-                i = i + 1
-                #time.sleep(1)
-                self.DRIVER.get(place)
-                time.sleep(1)
-                self.DRIVER.find_element('xpath', "//a[@title='Email advertiser']").click()
-                #time.sleep(1)
-                try:
-                    self.DRIVER.find_element('id', "message").send_keys(MESSAGE)
-                #time.sleep(1)
-                except:
-                    continue
-                try:
-                    self.DRIVER.find_element('xpath', "//button[@class='button button--large button--wide']").click()
-                    sys.stdout.write(f"[{i - neg_i}] Message delivered successfully\n")
-                except:
-                    with open(self.PLACES_FAILED_LOCAL, 'a') as hf:
-                        hf.write(f"{place}\n")
-                    neg_i = neg_i + 1
-                    sys.stdout.write(f"[{neg_i}] Message failed\n")
-                time.sleep(1)
-
-            try:
-                with open(self.PLACES_LOCAL, 'r') as hp:
-                    with open(self.PLACES_SPAMMED_LOCAL, 'a') as hpp:
-                        hpp.write(hp.read())
-                os.remove(self.PLACES_LOCAL)
-            except:
-                _msg = "[x] (6) Error cleaning up places_spammed.txt"
-                self.logger.log(_msg)
-                sys.stderr.write(_msg)
-                return 0
+        except FileNotFoundError:
+            _msg = "[x] (7) Error reading from places.txt"
+            self.logger.log(_msg)
+            sys.stderr.write(_msg)
             return 0
+        if '' in places:
+            places.pop()
+        i = 0
+        neg_i = 0
+        for place in places:
+            i = i + 1
+            time.sleep(1)
+            self.DRIVER.get(place)
+            time.sleep(1)
+            self.DRIVER.find_element('xpath', "//a[@title='Email advertiser']").click()
+            time.sleep(1)
+            try:
+                self.DRIVER.find_element('id', "message").send_keys(self.MESSAGE)
+                time.sleep(1)
+            except:
+                continue
+            try:
+                self.DRIVER.find_element('xpath', "//button[@class='button button--large button--wide']").click()
+                sys.stdout.write(f"[{i - neg_i}] Message delivered successfully\n")
+            except:
+                with open(self.PLACES_FAILED_LOCAL, 'a') as hf:
+                    hf.write(f"{place}\n")
+                neg_i = neg_i + 1
+                sys.stdout.write(f"[{neg_i}] Message failed\n")
+            time.sleep(1)
+
+        try:
+            with open(self.PLACES_LOCAL, 'r') as hp:
+                with open(self.PLACES_SPAMMED_LOCAL, 'a') as hpp:
+                    hpp.write(hp.read())
+            os.remove(self.PLACES_LOCAL)
+        except:
+            _msg = "[x] (7) Error cleaning up places_spammed.txt"
+            self.logger.log(_msg)
+            sys.stderr.write(_msg)
+            return 0
+        return 0
 
     def search(self):
         search_uri = "https://www.spareroom.co.uk/flatshare/search.pl"
@@ -135,7 +141,7 @@ class Bot:
             if '' in cities:
                 cities.pop()
         except FileNotFoundError:
-            _msg = "[x] (7) Error cleaning up places.txt"
+            _msg = "[x] (8) Error cleaning up places.txt"
             self.logger.log(_msg)
             sys.stderr.write(_msg)
             return 0
