@@ -148,17 +148,21 @@ class Bot:
         done = False
         for city in cities:
             done = False
-            driver.get(search_uri)
+            self.DRIVER.get(search_uri)
             time.sleep(1)
-            driver.find_element('id', "search_by_location_field").send_keys(city)
-            driver.find_element('xpath', "//div[@class='autocomplete-suggestion']").click()
+            self.DRIVER.find_element('id', "search_by_location_field").send_keys(city)
             time.sleep(1)
-            driver.find_element('id', "search-button").click()
+            try:
+                self.DRIVER.find_element('xpath', "//div[@class='autocomplete-suggestion']").click()
+            except:
+                continue
+            #time.sleep(1)
+            self.DRIVER.find_element('id', "search-button").click()
             while not done:
                 places = list()
                 #i = 10
                 try:
-                    elems = driver.find_elements('xpath', "//a[@href]")
+                    elems = self.DRIVER.find_elements('xpath', "//a[@href]")
                     links = [elem.get_attribute('href') for elem in elems]
                     for link in links:
                         if "flatshare_detail.pl" in link:
@@ -177,7 +181,7 @@ class Bot:
                         # click a id paginationNextPageLink
                         # ?offset={i}
                         # driver.find_element('xpath', "//div[@class='autocomplete-suggestion']").click()
-                        driver.find_element('id', "paginationNextPageLink").click()
+                        self.DRIVER.find_element('id', "paginationNextPageLink").click()
                         time.sleep(1)
                         # i += 10
                     except:
@@ -193,7 +197,7 @@ class Bot:
     def runme(self):
         self.login()
         if self.SEARCH_MODE:
-            bot.search()
+            self.search()
         else:
             self.spam()
         self.cleanupDriver()
