@@ -1,7 +1,7 @@
 # homeful
 Find yourself a home
 ````
-./.env -- USERNAME and PASSWORD env vars
+./.env -- USERNAME and PASSWORD env vars as HM_MAIL and HM_PASS
 ./data -- directory for data
 ./data/places.txt -- file for newline separated homes
 ./data/message.txt -- file for home searching message copy
