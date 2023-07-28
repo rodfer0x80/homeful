@@ -2,6 +2,7 @@
 > Find yourself a home
 
 ## Motivation
+> quick and dirty i wrote this late at night while wearing my blackhat hoodie, skipped sleep, grabbed two energy drinks one in each hand and got a room in the late afternoon
 ````
 On a real life problem...
 In 2022 I was looking to rent a room in London, but the market 
