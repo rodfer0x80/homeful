@@ -1,5 +1,6 @@
 # homeful
 > Find yourself a home
+> https://blog.rodfer.cloud/blog/posts/rent_chaos.txt
 
 ## Motivation
 > quick and dirty i wrote this late at night while wearing my blackhat hoodie, skipped sleep, grabbed two energy drinks one in each hand and got a room in the late afternoon
